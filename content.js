@@ -1,37 +1,34 @@
 let isEditMode = false;
-let selectedElement = null;
 
 function enableEditMode() {
   isEditMode = true;
   document.body.style.cursor = "crosshair";
-  addHoverListeners();
-}
-
-function disableEditMode() {
-  isEditMode = false;
-  document.body.style.cursor = "default";
-  removeHoverListeners();
-}
-
-function addHoverListeners() {
   document.addEventListener("mouseover", handleMouseOver);
   document.addEventListener("mouseout", handleMouseOut);
   document.addEventListener("click", handleClick, true);
 }
 
-function removeHoverListeners() {
+function disableEditMode() {
+  isEditMode = false;
+  document.body.style.cursor = "default";
   document.removeEventListener("mouseover", handleMouseOver);
   document.removeEventListener("mouseout", handleMouseOut);
   document.removeEventListener("click", handleClick, true);
+
+  // Remove any remaining outlines
+  const elements = document.querySelectorAll("*");
+  elements.forEach(el => (el.style.outline = ""));
 }
 
 function handleMouseOver(e) {
   if (!isEditMode) return;
+  e.stopPropagation();
   e.target.style.outline = "2px solid #007bff";
 }
 
 function handleMouseOut(e) {
   if (!isEditMode) return;
+  e.stopPropagation();
   e.target.style.outline = "";
 }
 
@@ -40,8 +37,7 @@ function handleClick(e) {
   e.preventDefault();
   e.stopPropagation();
 
-  selectedElement = e.target;
-  const styles = window.getComputedStyle(selectedElement);
+  const styles = window.getComputedStyle(e.target);
   const cssProperties = {};
 
   for (let prop of styles) {
@@ -53,16 +49,6 @@ function handleClick(e) {
     css: cssProperties,
   });
 }
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "TOGGLE_EDIT_MODE") {
-    if (!isEditMode) {
-      enableEditMode();
-    } else {
-      disableEditMode();
-    }
-  }
-});
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "EDIT_MODE_CHANGED") {
