@@ -37,58 +37,65 @@ function handleClick(e) {
   try {
     const element = e.target;
     const computedStyles = window.getComputedStyle(element);
-    const defaultElement = document.createElement(element.tagName);
-    document.body.appendChild(defaultElement);
-    const defaultStyles = window.getComputedStyle(defaultElement);
-
     const cssProperties = {};
-    const importantProperties = [
+
+    // Get inline styles
+    const inlineStyles = element.style;
+    for (let i = 0; i < inlineStyles.length; i++) {
+      const prop = inlineStyles[i];
+      cssProperties[prop] = inlineStyles[prop];
+    }
+
+    // Get styles from applied stylesheets
+    const sheets = document.styleSheets;
+    for (let i = 0; i < sheets.length; i++) {
+      try {
+        const rules = sheets[i].cssRules || sheets[i].rules;
+        for (let j = 0; j < rules.length; j++) {
+          const rule = rules[j];
+          if (element.matches(rule.selectorText)) {
+            const ruleStyle = rule.style;
+            for (let k = 0; k < ruleStyle.length; k++) {
+              const prop = ruleStyle[k];
+              cssProperties[prop] = computedStyles.getPropertyValue(prop);
+            }
+          }
+        }
+      } catch (e) {
+        // Skip cross-origin stylesheets
+        continue;
+      }
+    }
+
+    // Add important layout properties even if inherited
+    const criticalProps = [
       "display",
       "position",
       "width",
       "height",
       "margin",
       "padding",
-      "border",
-      "background-color",
-      "color",
-      "font-family",
-      "font-size",
-      "font-weight",
-      "text-align",
-      "flex",
-      "grid",
-      "transform",
-      "opacity",
-      "z-index",
     ];
-
-    // Get explicitly set styles
-    for (const prop of computedStyles) {
-      const computedValue = computedStyles.getPropertyValue(prop);
-      const defaultValue = defaultStyles.getPropertyValue(prop);
-      const isImportant = importantProperties.some(p => prop.startsWith(p));
-
-      // Include property if it's different from default or is important
-      if (computedValue !== defaultValue || isImportant) {
-        cssProperties[prop] = computedValue;
+    criticalProps.forEach(prop => {
+      if (!cssProperties[prop]) {
+        const value = computedStyles.getPropertyValue(prop);
+        if (value && value !== "none" && value !== "0px") {
+          cssProperties[prop] = value;
+        }
       }
-    }
+    });
 
-    // Cleanup
-    document.body.removeChild(defaultElement);
-
-    chrome.runtime
-      .sendMessage({
-        type: "ELEMENT_SELECTED",
-        css: cssProperties,
+    chrome.runtime.sendMessage({
+      type: "ELEMENT_SELECTED",
+      css: cssProperties,
+      elementInfo: {
         tagName: element.tagName.toLowerCase(),
         classes: Array.from(element.classList),
         id: element.id,
-      })
-      .catch(() => disableEditMode());
+      },
+    });
   } catch (error) {
-    console.log("Error:", error);
+    console.error("Click handler error:", error);
     disableEditMode();
   }
 }
