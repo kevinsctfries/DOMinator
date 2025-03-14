@@ -1,18 +1,8 @@
-console.log("Popup script loaded");
-
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM Content Loaded");
-
   const editModeButton = document.getElementById("editMode");
-  if (editModeButton) {
-    console.log("Edit mode button found");
-    editModeButton.addEventListener("click", () => {
-      console.log("Edit Mode Toggled");
-      chrome.runtime.sendMessage({ type: "TOGGLE_EDIT_MODE" });
-    });
-  } else {
-    console.error("Edit mode button not found");
-  }
+  editModeButton.addEventListener("click", () => {
+    chrome.runtime.sendMessage({ type: "TOGGLE_EDIT_MODE" });
+  });
 
   document.getElementById("reset").addEventListener("click", async () => {
     const [tab] = await chrome.tabs.query({
@@ -22,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     chrome.tabs.reload(tab.id);
   });
 
-  chrome.runtime.onMessage.addListener((message, sender) => {
+  chrome.runtime.onMessage.addListener(message => {
     if (message.type === "ELEMENT_SELECTED") {
       displayCSS(message.css);
     }
@@ -32,26 +22,51 @@ document.addEventListener("DOMContentLoaded", () => {
     const propertiesDiv = document.getElementById("cssProperties");
     propertiesDiv.innerHTML = "";
 
-    for (let [property, value] of Object.entries(cssProperties)) {
-      const propertyElement = document.createElement("div");
-      propertyElement.className = "css-property";
-      propertyElement.textContent = `${property}: ${value};`;
-      propertiesDiv.appendChild(propertyElement);
+    // Group properties by category
+    const categories = {
+      Layout: ["display", "position", "width", "height", "margin", "padding"],
+      Typography: ["font", "text", "color", "line-height"],
+      Visual: ["background", "border", "box-shadow", "opacity"],
+      Transform: ["transform", "transition", "animation"],
+      Other: [],
+    };
+
+    const categorizedProps = {};
+    for (const [prop, value] of Object.entries(cssProperties)) {
+      let categorized = false;
+      for (const [category, patterns] of Object.entries(categories)) {
+        if (patterns.some(pattern => prop.startsWith(pattern))) {
+          categorizedProps[category] = categorizedProps[category] || {};
+          categorizedProps[category][prop] = value;
+          categorized = true;
+          break;
+        }
+      }
+      if (!categorized) {
+        categorizedProps["Other"] = categorizedProps["Other"] || {};
+        categorizedProps["Other"][prop] = value;
+      }
+    }
+
+    // Create and append category sections
+    for (const [category, props] of Object.entries(categorizedProps)) {
+      if (Object.keys(props).length === 0) continue;
+
+      const categoryDiv = document.createElement("div");
+      categoryDiv.className = "css-category";
+
+      const categoryTitle = document.createElement("h3");
+      categoryTitle.textContent = category;
+      categoryDiv.appendChild(categoryTitle);
+
+      for (const [prop, value] of Object.entries(props)) {
+        const propertyElement = document.createElement("div");
+        propertyElement.className = "css-property";
+        propertyElement.textContent = `${prop}: ${value};`;
+        categoryDiv.appendChild(propertyElement);
+      }
+
+      propertiesDiv.appendChild(categoryDiv);
     }
   }
-
-  // Keep popup open
-  document.documentElement.addEventListener("click", e => {
-    e.stopPropagation();
-  });
-
-  // Prevent popup from closing
-  window.addEventListener("blur", e => {
-    e.stopPropagation();
-    e.preventDefault();
-  });
-
-  document.addEventListener("click", e => {
-    e.stopPropagation();
-  });
 });

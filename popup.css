@@ -1,6 +1,7 @@
 body {
   font-family: Arial, sans-serif;
-  width: 200px;
+  width: auto;
+  min-width: 300px;
   padding: 10px;
   text-align: center;
 }
@@ -31,7 +32,7 @@ body.edit-mode {
 }
 
 .properties-container {
-  max-height: 300px;
+  max-height: 500px;
   overflow-y: auto;
   margin-top: 10px;
   text-align: left;
@@ -39,9 +40,21 @@ body.edit-mode {
   padding: 5px;
 }
 
+.css-category {
+  margin-bottom: 15px;
+}
+
+.css-category h3 {
+  font-size: 14px;
+  color: #007bff;
+  margin: 10px 0 5px 0;
+  padding-bottom: 3px;
+  border-bottom: 1px solid #eee;
+}
+
 .css-property {
   font-family: monospace;
   font-size: 12px;
-  padding: 2px 0;
+  padding: 3px 0 3px 10px;
   border-bottom: 1px solid #eee;
 }

@@ -14,10 +14,7 @@ function disableEditMode() {
   document.removeEventListener("mouseover", handleMouseOver);
   document.removeEventListener("mouseout", handleMouseOut);
   document.removeEventListener("click", handleClick, true);
-
-  // Remove any remaining outlines
-  const elements = document.querySelectorAll("*");
-  elements.forEach(el => (el.style.outline = ""));
+  clearHighlights();
 }
 
 function handleMouseOver(e) {
@@ -37,19 +34,70 @@ function handleClick(e) {
   e.preventDefault();
   e.stopPropagation();
 
-  const styles = window.getComputedStyle(e.target);
-  const cssProperties = {};
+  try {
+    const element = e.target;
+    const computedStyles = window.getComputedStyle(element);
+    const defaultElement = document.createElement(element.tagName);
+    document.body.appendChild(defaultElement);
+    const defaultStyles = window.getComputedStyle(defaultElement);
 
-  for (let prop of styles) {
-    cssProperties[prop] = styles.getPropertyValue(prop);
+    const cssProperties = {};
+    const importantProperties = [
+      "display",
+      "position",
+      "width",
+      "height",
+      "margin",
+      "padding",
+      "border",
+      "background-color",
+      "color",
+      "font-family",
+      "font-size",
+      "font-weight",
+      "text-align",
+      "flex",
+      "grid",
+      "transform",
+      "opacity",
+      "z-index",
+    ];
+
+    // Get explicitly set styles
+    for (const prop of computedStyles) {
+      const computedValue = computedStyles.getPropertyValue(prop);
+      const defaultValue = defaultStyles.getPropertyValue(prop);
+      const isImportant = importantProperties.some(p => prop.startsWith(p));
+
+      // Include property if it's different from default or is important
+      if (computedValue !== defaultValue || isImportant) {
+        cssProperties[prop] = computedValue;
+      }
+    }
+
+    // Cleanup
+    document.body.removeChild(defaultElement);
+
+    chrome.runtime
+      .sendMessage({
+        type: "ELEMENT_SELECTED",
+        css: cssProperties,
+        tagName: element.tagName.toLowerCase(),
+        classes: Array.from(element.classList),
+        id: element.id,
+      })
+      .catch(() => disableEditMode());
+  } catch (error) {
+    console.log("Error:", error);
+    disableEditMode();
   }
-
-  chrome.runtime.sendMessage({
-    type: "ELEMENT_SELECTED",
-    css: cssProperties,
-  });
 }
 
+function clearHighlights() {
+  document.querySelectorAll("*").forEach(el => (el.style.outline = ""));
+}
+
+// Listen for messages
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "EDIT_MODE_CHANGED") {
     if (message.isActive) {
@@ -57,12 +105,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     } else {
       disableEditMode();
     }
+    sendResponse({ success: true });
   }
+  return true;
 });
 
-// Add this to prevent the popup from closing when clicking the page
-window.addEventListener("click", e => {
-  if (isEditMode) {
-    e.stopPropagation();
-  }
-});
+// Initialize immediately
+enableEditMode();
+
+// Handle page unload
+window.addEventListener("unload", () => disableEditMode());
