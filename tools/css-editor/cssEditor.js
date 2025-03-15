@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Go back home
+  // Go back
   document.getElementById("backToHome").addEventListener("click", () => {
-    window.location.href = "popup.html";
+    window.location.href = "../../popup.html";
   });
 
   // UI element initialization

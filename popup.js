@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("openCssEditor").addEventListener("click", () => {
-    window.location.href = "cssEditor.html";
+    window.location.href = "tools/css-editor/cssEditor.html";
   });
 });

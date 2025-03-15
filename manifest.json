@@ -17,8 +17,8 @@
         "content.js",
         "popup.css",
         "popup.html",
-        "cssEditor.html",
-        "cssEditor.js"
+        "tools/css-editor/cssEditor.html",
+        "tools/css-editor/cssEditor.js"
       ],
       "matches": ["<all_urls>"]
     }
