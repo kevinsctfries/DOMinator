@@ -43,14 +43,21 @@ if (!window.dominatorInitialized) {
 
     try {
       const element = e.target;
+      // Remove highlight before getting styles
+      const currentOutline = element.style.outline;
+      element.style.outline = "";
+
       const computedStyles = window.getComputedStyle(element);
       const cssProperties = {};
 
-      // Get inline styles
+      // Get inline styles (excluding our temporary outline)
       const inlineStyles = element.style;
       for (let i = 0; i < inlineStyles.length; i++) {
         const prop = inlineStyles[i];
-        cssProperties[prop] = inlineStyles[prop];
+        if (prop !== "outline") {
+          // Skip our temporary outline
+          cssProperties[prop] = inlineStyles[prop];
+        }
       }
 
       // Get styles from applied stylesheets
@@ -91,6 +98,9 @@ if (!window.dominatorInitialized) {
           }
         }
       });
+
+      // Restore highlight after getting styles
+      element.style.outline = currentOutline;
 
       chrome.runtime.sendMessage({
         type: "ELEMENT_SELECTED",
