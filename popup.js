@@ -1,12 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("Popup initialized");
-
+  // UI element initialization
   const editModeButton = document.getElementById("editMode");
   let isEditModeActive = false;
 
+  // Edit mode toggle handler
   editModeButton.addEventListener("click", async () => {
     try {
-      // Get the original tab ID from background script
+      // Get reference to original tab
       const response = await chrome.runtime.sendMessage({
         type: "GET_ORIGINAL_TAB",
       });
@@ -15,47 +15,41 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const tabId = response.tabId;
-      console.log("Using original tab:", tabId);
 
-      // Inject the content script
-      try {
-        await chrome.scripting.executeScript({
-          target: { tabId },
-          files: ["content.js"],
-        });
-        console.log("Content script injected");
-      } catch (err) {
-        console.log("Script injection error (might already be loaded):", err);
-      }
+      // Inject content script
+      await chrome.scripting.executeScript({
+        target: { tabId },
+        files: ["content.js"],
+      });
 
-      // Toggle state
+      // Wait for script initialization
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Update UI state
       isEditModeActive = !isEditModeActive;
-      console.log("Setting edit mode to:", isEditModeActive);
+      updateButtonState(isEditModeActive);
 
-      // Update button
-      editModeButton.textContent = isEditModeActive
-        ? "Disable Edit Mode"
-        : "Enable Edit Mode";
-      editModeButton.className = isEditModeActive ? "active" : "";
-
-      // Send toggle message to the original tab
-      const msgResponse = await chrome.tabs.sendMessage(tabId, {
+      // Notify content script
+      await chrome.tabs.sendMessage(tabId, {
         type: "TOGGLE_EDIT_MODE",
         isActive: isEditModeActive,
       });
-
-      console.log("Response:", msgResponse);
     } catch (error) {
-      console.error("Error:", error);
-      // Revert button state
+      // Revert UI state on error
       isEditModeActive = !isEditModeActive;
-      editModeButton.textContent = isEditModeActive
-        ? "Disable Edit Mode"
-        : "Enable Edit Mode";
-      editModeButton.className = isEditModeActive ? "active" : "";
+      updateButtonState(isEditModeActive);
     }
   });
 
+  // Helper function for button state management
+  function updateButtonState(active) {
+    editModeButton.textContent = active
+      ? "Disable Edit Mode"
+      : "Enable Edit Mode";
+    editModeButton.className = active ? "active" : "";
+  }
+
+  // Page reset handler
   document.getElementById("reset").addEventListener("click", async () => {
     const [tab] = await chrome.tabs.query({
       active: true,
@@ -64,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
     chrome.tabs.reload(tab.id);
   });
 
+  // CSS display system
   chrome.runtime.onMessage.addListener(message => {
     if (message.type === "ELEMENT_SELECTED") {
       displayCSS(message.css);
@@ -74,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const propertiesDiv = document.getElementById("cssProperties");
     propertiesDiv.innerHTML = "";
 
-    // Group properties by category
+    // CSS property categorization
     const categories = {
       Layout: ["display", "position", "width", "height", "margin", "padding"],
       Typography: ["font", "text", "color", "line-height"],
@@ -83,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Other: [],
     };
 
+    // Sort properties into categories
     const categorizedProps = {};
     for (const [prop, value] of Object.entries(cssProperties)) {
       let categorized = false;
@@ -100,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Create and append category sections
+    // Render categorized properties
     for (const [category, props] of Object.entries(categorizedProps)) {
       if (Object.keys(props).length === 0) continue;
 

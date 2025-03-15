@@ -1,25 +1,23 @@
-// Only initialize if not already loaded
+// Initialize only once
 if (!window.dominatorInitialized) {
   window.dominatorInitialized = true;
-  console.log("Content script starting...");
 
-  window.dominator = {
-    isEditMode: false,
-  };
+  // Global state management
+  window.dominator = { isEditMode: false };
 
+  // Edit mode control functions
   function enableEditMode() {
-    console.log("Enabling edit mode");
     window.dominator.isEditMode = true;
     document.body.style.cursor = "crosshair";
   }
 
   function disableEditMode() {
-    console.log("Disabling edit mode");
     window.dominator.isEditMode = false;
     document.body.style.cursor = "default";
     clearHighlights();
   }
 
+  // Element highlighting functions
   function handleMouseOver(e) {
     if (!window.dominator.isEditMode) return;
     if (e.target === document.body) return;
@@ -36,6 +34,7 @@ if (!window.dominatorInitialized) {
     document.querySelectorAll("*").forEach(el => (el.style.outline = ""));
   }
 
+  // CSS extraction and processing
   function handleClick(e) {
     if (!window.dominator.isEditMode) return;
     e.preventDefault();
@@ -43,24 +42,23 @@ if (!window.dominatorInitialized) {
 
     try {
       const element = e.target;
-      // Remove highlight before getting styles
+      // Temporarily remove highlight to avoid capturing it
       const currentOutline = element.style.outline;
       element.style.outline = "";
 
       const computedStyles = window.getComputedStyle(element);
       const cssProperties = {};
 
-      // Get inline styles (excluding our temporary outline)
+      // Process inline styles (excluding temporary outline)
       const inlineStyles = element.style;
       for (let i = 0; i < inlineStyles.length; i++) {
         const prop = inlineStyles[i];
         if (prop !== "outline") {
-          // Skip our temporary outline
           cssProperties[prop] = inlineStyles[prop];
         }
       }
 
-      // Get styles from applied stylesheets
+      // Process stylesheet rules
       const sheets = document.styleSheets;
       for (let i = 0; i < sheets.length; i++) {
         try {
@@ -76,12 +74,11 @@ if (!window.dominatorInitialized) {
             }
           }
         } catch (e) {
-          // Skip cross-origin stylesheets
-          continue;
+          continue; // Skip inaccessible stylesheets
         }
       }
 
-      // Add important layout properties even if inherited
+      // Ensure critical layout properties are included
       const criticalProps = [
         "display",
         "position",
@@ -99,9 +96,10 @@ if (!window.dominatorInitialized) {
         }
       });
 
-      // Restore highlight after getting styles
+      // Restore highlight
       element.style.outline = currentOutline;
 
+      // Send extracted CSS to popup
       chrome.runtime.sendMessage({
         type: "ELEMENT_SELECTED",
         css: cssProperties,
@@ -112,30 +110,21 @@ if (!window.dominatorInitialized) {
         },
       });
     } catch (error) {
-      console.error("Click handler error:", error);
       disableEditMode();
     }
   }
 
-  // Set up message listener
+  // Message handling
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log("Received message:", message);
-
     if (message.type === "TOGGLE_EDIT_MODE") {
-      if (message.isActive) {
-        enableEditMode();
-      } else {
-        disableEditMode();
-      }
+      message.isActive ? enableEditMode() : disableEditMode();
       sendResponse({ success: true });
     }
     return true;
   });
 
-  // Add event listeners
+  // Event listeners setup
   document.addEventListener("mouseover", handleMouseOver, true);
   document.addEventListener("mouseout", handleMouseOut, true);
   document.addEventListener("click", handleClick, true);
-
-  console.log("Content script ready!");
 }
