@@ -12,7 +12,14 @@
   "host_permissions": ["http://*/*", "https://*/*"],
   "web_accessible_resources": [
     {
-      "resources": ["popup.js", "content.js", "popup.css", "popup.html"],
+      "resources": [
+        "popup.js",
+        "content.js",
+        "popup.css",
+        "popup.html",
+        "cssEditor.html",
+        "cssEditor.js"
+      ],
       "matches": ["<all_urls>"]
     }
   ],
@@ -24,7 +31,8 @@
     }
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "content_scripts": []
 }
