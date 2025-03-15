@@ -2,8 +2,10 @@
 if (!window.dominatorInitialized) {
   window.dominatorInitialized = true;
 
-  // Global state management
-  window.dominator = { isEditMode: false };
+  window.dominator = {
+    isEditMode: false,
+    activeElement: null,
+  };
 
   // Edit mode control functions
   function enableEditMode() {
@@ -21,17 +23,23 @@ if (!window.dominatorInitialized) {
   function handleMouseOver(e) {
     if (!window.dominator.isEditMode) return;
     if (e.target === document.body) return;
-    e.target.style.outline = "2px solid blue";
+    if (e.target === window.dominator.activeElement) return;
+    e.target.style.outline = "2px solid rgba(0, 123, 255, 0.5)"; // Light blue
   }
 
   function handleMouseOut(e) {
     if (!window.dominator.isEditMode) return;
     if (e.target === document.body) return;
+    if (e.target === window.dominator.activeElement) return;
     e.target.style.outline = "";
   }
 
   function clearHighlights() {
-    document.querySelectorAll("*").forEach(el => (el.style.outline = ""));
+    document.querySelectorAll("*").forEach(el => {
+      if (el !== window.dominator.activeElement) {
+        el.style.outline = "";
+      }
+    });
   }
 
   // CSS extraction and processing
@@ -41,8 +49,17 @@ if (!window.dominatorInitialized) {
     e.stopPropagation();
 
     try {
+      // Clear previous active element
+      if (window.dominator.activeElement) {
+        window.dominator.activeElement.style.outline = "";
+      }
+
       const element = e.target;
-      // Temporarily remove highlight to avoid capturing it
+      // Set new active element with thin blue outline
+      window.dominator.activeElement = element;
+      element.style.outline = "1px solid rgba(0, 123, 255, 0.7)";
+
+      // Store current outline for CSS processing
       const currentOutline = element.style.outline;
       element.style.outline = "";
 
@@ -96,7 +113,7 @@ if (!window.dominatorInitialized) {
         }
       });
 
-      // Restore highlight
+      // Restore the active outline
       element.style.outline = currentOutline;
 
       // Send extracted CSS to popup
