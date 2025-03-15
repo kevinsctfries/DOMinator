@@ -137,6 +137,19 @@ if (!window.dominatorInitialized) {
       message.isActive ? enableEditMode() : disableEditMode();
       sendResponse({ success: true });
     }
+    if (message.type === "UPDATE_CSS") {
+      try {
+        if (window.dominator.activeElement) {
+          Object.entries(message.css).forEach(([prop, value]) => {
+            window.dominator.activeElement.style.setProperty(prop, value);
+          });
+          sendResponse({ success: true });
+        }
+      } catch (error) {
+        console.error("Failed to update CSS:", error);
+        sendResponse({ success: false, error: error.message });
+      }
+    }
     return true;
   });
 

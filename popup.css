@@ -52,8 +52,24 @@ button#editMode.active {
 }
 
 .css-property {
+  display: flex;
+  align-items: center;
   font-family: monospace;
   font-size: 12px;
   padding: 3px 0 3px 10px;
   border-bottom: 1px solid #eee;
+}
+
+.css-value-input {
+  flex: 1;
+  margin-left: 5px;
+  border: 1px solid #eee;
+  padding: 2px 5px;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.css-value-input:focus {
+  outline: 1px solid #007bff;
+  border-color: #007bff;
 }

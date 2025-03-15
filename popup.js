@@ -3,6 +3,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const editModeButton = document.getElementById("editMode");
   let isEditModeActive = false;
 
+  // Add tabId tracking
+  let activeTabId = null;
+
   // Edit mode toggle handler
   editModeButton.addEventListener("click", async () => {
     try {
@@ -15,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const tabId = response.tabId;
+      activeTabId = response.tabId;
 
       // Inject content script
       await chrome.scripting.executeScript({
@@ -78,6 +82,18 @@ document.addEventListener("DOMContentLoaded", () => {
       Other: [],
     };
 
+    // Create input handler for CSS updates
+    function handleCSSChange(prop, value) {
+      if (!activeTabId) return;
+
+      chrome.tabs
+        .sendMessage(activeTabId, {
+          type: "UPDATE_CSS",
+          css: { [prop]: value },
+        })
+        .catch(console.error);
+    }
+
     // Sort properties into categories
     const categorizedProps = {};
     for (const [prop, value] of Object.entries(cssProperties)) {
@@ -110,7 +126,29 @@ document.addEventListener("DOMContentLoaded", () => {
       for (const [prop, value] of Object.entries(props)) {
         const propertyElement = document.createElement("div");
         propertyElement.className = "css-property";
-        propertyElement.textContent = `${prop}: ${value};`;
+
+        // Create property name label
+        const propName = document.createElement("span");
+        propName.textContent = `${prop}: `;
+        propertyElement.appendChild(propName);
+
+        // Create editable value field
+        const valueInput = document.createElement("input");
+        valueInput.type = "text";
+        valueInput.value = value;
+        valueInput.className = "css-value-input";
+
+        // Handle value changes
+        valueInput.addEventListener("input", e => {
+          handleCSSChange(prop, e.target.value);
+        });
+
+        // Update on both input and change events
+        valueInput.addEventListener("change", e => {
+          handleCSSChange(prop, e.target.value);
+        });
+
+        propertyElement.appendChild(valueInput);
         categoryDiv.appendChild(propertyElement);
       }
 
