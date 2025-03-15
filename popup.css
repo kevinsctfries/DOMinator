@@ -73,3 +73,27 @@ button#editMode.active {
   outline: 1px solid #007bff;
   border-color: #007bff;
 }
+
+.element-info {
+  margin: 10px 0;
+  padding: 10px;
+  background: #f8f9fa;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+  text-align: left;
+}
+
+.element-info .tag {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.element-info .class {
+  color: #28a745;
+}
+
+.element-info .id {
+  color: #dc3545;
+}

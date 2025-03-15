@@ -65,9 +65,32 @@ document.addEventListener("DOMContentLoaded", () => {
   // CSS display system
   chrome.runtime.onMessage.addListener(message => {
     if (message.type === "ELEMENT_SELECTED") {
+      displayElementInfo(message.elementInfo);
       displayCSS(message.css);
     }
   });
+
+  function displayElementInfo(elementInfo) {
+    const infoDiv = document.getElementById("elementInfo");
+    const parts = [];
+
+    // Add tag
+    parts.push(`<span class="tag">${elementInfo.tagName}</span>`);
+
+    // Add classes if any
+    if (elementInfo.classes.length > 0) {
+      parts.push(
+        `<span class="class">.${elementInfo.classes.join(".")}</span>`
+      );
+    }
+
+    // Add ID if any
+    if (elementInfo.id) {
+      parts.push(`<span class="id">#${elementInfo.id}</span>`);
+    }
+
+    infoDiv.innerHTML = parts.join(" ");
+  }
 
   function displayCSS(cssProperties) {
     const propertiesDiv = document.getElementById("cssProperties");
