@@ -1,32 +1,34 @@
+console.log("Content script starting...");
+
 let isEditMode = false;
 
 function enableEditMode() {
+  console.log("Enabling edit mode");
   isEditMode = true;
   document.body.style.cursor = "crosshair";
-  document.addEventListener("mouseover", handleMouseOver);
-  document.addEventListener("mouseout", handleMouseOut);
-  document.addEventListener("click", handleClick, true);
 }
 
 function disableEditMode() {
+  console.log("Disabling edit mode");
   isEditMode = false;
   document.body.style.cursor = "default";
-  document.removeEventListener("mouseover", handleMouseOver);
-  document.removeEventListener("mouseout", handleMouseOut);
-  document.removeEventListener("click", handleClick, true);
   clearHighlights();
 }
 
 function handleMouseOver(e) {
   if (!isEditMode) return;
-  e.stopPropagation();
-  e.target.style.outline = "2px solid #007bff";
+  if (e.target === document.body) return;
+  e.target.style.outline = "2px solid blue";
 }
 
 function handleMouseOut(e) {
   if (!isEditMode) return;
-  e.stopPropagation();
+  if (e.target === document.body) return;
   e.target.style.outline = "";
+}
+
+function clearHighlights() {
+  document.querySelectorAll("*").forEach(el => (el.style.outline = ""));
 }
 
 function handleClick(e) {
@@ -100,13 +102,11 @@ function handleClick(e) {
   }
 }
 
-function clearHighlights() {
-  document.querySelectorAll("*").forEach(el => (el.style.outline = ""));
-}
-
-// Listen for messages
+// Set up message listener
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "EDIT_MODE_CHANGED") {
+  console.log("Received message:", message);
+
+  if (message.type === "TOGGLE_EDIT_MODE") {
     if (message.isActive) {
       enableEditMode();
     } else {
@@ -117,8 +117,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
-// Initialize immediately
-enableEditMode();
+// Add event listeners
+document.addEventListener("mouseover", handleMouseOver, true);
+document.addEventListener("mouseout", handleMouseOut, true);
+document.addEventListener("click", handleClick, true);
 
-// Handle page unload
-window.addEventListener("unload", () => disableEditMode());
+console.log("Content script ready!");

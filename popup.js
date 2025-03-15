@@ -1,7 +1,59 @@
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("Popup initialized");
+
   const editModeButton = document.getElementById("editMode");
-  editModeButton.addEventListener("click", () => {
-    chrome.runtime.sendMessage({ type: "TOGGLE_EDIT_MODE" });
+  let isEditModeActive = false;
+
+  editModeButton.addEventListener("click", async () => {
+    try {
+      // Get the original tab ID from background script
+      const response = await chrome.runtime.sendMessage({
+        type: "GET_ORIGINAL_TAB",
+      });
+      if (!response?.tabId) {
+        throw new Error("Could not find original tab");
+      }
+
+      const tabId = response.tabId;
+      console.log("Using original tab:", tabId);
+
+      // Inject the content script
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId },
+          files: ["content.js"],
+        });
+        console.log("Content script injected");
+      } catch (err) {
+        console.log("Script injection error (might already be loaded):", err);
+      }
+
+      // Toggle state
+      isEditModeActive = !isEditModeActive;
+      console.log("Setting edit mode to:", isEditModeActive);
+
+      // Update button
+      editModeButton.textContent = isEditModeActive
+        ? "Disable Edit Mode"
+        : "Enable Edit Mode";
+      editModeButton.className = isEditModeActive ? "active" : "";
+
+      // Send toggle message to the original tab
+      const msgResponse = await chrome.tabs.sendMessage(tabId, {
+        type: "TOGGLE_EDIT_MODE",
+        isActive: isEditModeActive,
+      });
+
+      console.log("Response:", msgResponse);
+    } catch (error) {
+      console.error("Error:", error);
+      // Revert button state
+      isEditModeActive = !isEditModeActive;
+      editModeButton.textContent = isEditModeActive
+        ? "Disable Edit Mode"
+        : "Enable Edit Mode";
+      editModeButton.className = isEditModeActive ? "active" : "";
+    }
   });
 
   document.getElementById("reset").addEventListener("click", async () => {

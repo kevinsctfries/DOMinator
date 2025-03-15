@@ -8,8 +8,8 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "permissions": ["activeTab", "scripting", "storage", "tabs", "windows"],
-  "host_permissions": ["<all_urls>"],
+  "permissions": ["activeTab", "scripting", "tabs", "storage"],
+  "host_permissions": ["http://*/*", "https://*/*"],
   "web_accessible_resources": [
     {
       "resources": ["popup.js", "content.js", "popup.css", "popup.html"],
