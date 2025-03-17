@@ -43,6 +43,25 @@ if (!window.dominatorInitialized) {
   }
 
   // CSS extraction and processing
+  function getElementCSS(element) {
+    const styles = {};
+    const computedStyles = window.getComputedStyle(element);
+
+    // Get all applied styles
+    for (let i = 0; i < computedStyles.length; i++) {
+      const prop = computedStyles[i];
+      const value = computedStyles.getPropertyValue(prop);
+      if (value && value !== "initial" && value !== "none" && value !== "0px") {
+        styles[prop] = value;
+      }
+    }
+
+    // Format CSS into string
+    return Object.entries(styles)
+      .map(([prop, value]) => `${prop}: ${value};`)
+      .join("\n");
+  }
+
   function handleClick(e) {
     if (!window.dominator.isEditMode) return;
     e.preventDefault();
@@ -116,10 +135,16 @@ if (!window.dominatorInitialized) {
       // Restore the active outline
       element.style.outline = currentOutline;
 
+      // Get raw HTML and CSS
+      const rawHtml = element.outerHTML;
+      const rawCss = getElementCSS(element);
+
       // Send extracted CSS to popup
       chrome.runtime.sendMessage({
         type: "ELEMENT_SELECTED",
         css: cssProperties,
+        rawHtml: rawHtml,
+        rawCss: rawCss,
         elementInfo: {
           tagName: element.tagName.toLowerCase(),
           classes: Array.from(element.classList),

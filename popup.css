@@ -97,3 +97,37 @@ button#editMode.active {
 .element-info .id {
   color: #dc3545;
 }
+
+.code-container {
+  margin-top: 15px;
+  text-align: left;
+}
+
+.code-section {
+  margin: 10px 0;
+  padding: 10px;
+  background: #f8f9fa;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+.code-section h3 {
+  margin: 0 0 10px 0;
+  color: #007bff;
+  font-size: 14px;
+}
+
+.code-display {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  background: #fff;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  max-height: 200px;
+  overflow-y: auto;
+}
