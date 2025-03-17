@@ -74,14 +74,20 @@ if (!window.dominatorInitialized) {
       }
 
       const element = e.target;
-      // Set new active element with thin blue outline
+
+      // Temporarily remove any outline before capturing HTML/CSS
+      const originalOutline = element.style.outline;
+      element.style.outline = "";
+
+      // Capture raw HTML and CSS while outline is removed
+      const rawHtml = element.outerHTML;
+      const rawCss = getElementCSS(element);
+
+      // Restore active element highlighting
       window.dominator.activeElement = element;
       element.style.outline = "1px solid rgba(0, 123, 255, 0.7)";
 
-      // Store current outline for CSS processing
-      const currentOutline = element.style.outline;
-      element.style.outline = "";
-
+      // Get CSS properties for CSS editor (using the same outline-free state)
       const computedStyles = window.getComputedStyle(element);
       const cssProperties = {};
 
@@ -132,14 +138,7 @@ if (!window.dominatorInitialized) {
         }
       });
 
-      // Restore the active outline
-      element.style.outline = currentOutline;
-
-      // Get raw HTML and CSS
-      const rawHtml = element.outerHTML;
-      const rawCss = getElementCSS(element);
-
-      // Send extracted CSS to popup
+      // Send both raw and processed data
       chrome.runtime.sendMessage({
         type: "ELEMENT_SELECTED",
         css: cssProperties,
