@@ -215,12 +215,41 @@ button#editMode.active {
 
 .code-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px;
   margin-bottom: 12px;
+  cursor: pointer;
+  user-select: none;
 }
 
 .code-header h3 {
+  margin: 0;
+  flex: 1;
+}
+
+.collapse-button {
+  background: none;
+  border: none;
+  padding: 0 4px;
+  color: #1a73e8;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  width: auto;
+  box-shadow: none;
+  margin: 0;
+}
+
+.collapse-button.collapsed {
+  transform: rotate(-90deg);
+}
+
+.code-content {
+  transition: height 0.3s ease-out;
+  overflow: hidden;
+}
+
+.code-content.collapsed {
+  height: 0;
   margin: 0;
 }
 

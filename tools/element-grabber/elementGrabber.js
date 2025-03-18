@@ -4,6 +4,36 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "../../popup.html";
   });
 
+  // Add this near the top of your DOMContentLoaded handler
+  document.querySelectorAll(".code-header").forEach(header => {
+    header.addEventListener("click", e => {
+      // Don't collapse if clicking the copy button
+      if (e.target.classList.contains("copy-button")) return;
+
+      const section = header.closest(".code-section");
+      const content = section.querySelector(".code-content");
+      const collapseButton = header.querySelector(".collapse-button");
+
+      if (!content.classList.contains("collapsed")) {
+        content.style.height = content.scrollHeight + "px";
+        // Force a reflow
+        content.offsetHeight;
+        content.classList.add("collapsed");
+        content.style.height = "0";
+        collapseButton.classList.add("collapsed");
+      } else {
+        content.classList.remove("collapsed");
+        content.style.height = content.scrollHeight + "px";
+        collapseButton.classList.remove("collapsed");
+        // Remove the explicit height after transition
+        content.addEventListener("transitionend", function handler() {
+          content.style.height = "";
+          content.removeEventListener("transitionend", handler);
+        });
+      }
+    });
+  });
+
   const editModeButton = document.getElementById("grabElement");
   let isEditModeActive = false;
 
