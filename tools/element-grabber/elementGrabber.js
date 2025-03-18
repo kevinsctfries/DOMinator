@@ -48,6 +48,59 @@ document.addEventListener("DOMContentLoaded", () => {
     editModeButton.className = active ? "active" : "";
   }
 
+  // Copy button functionality
+  const copyHtmlButton = document.getElementById("copyHtmlButton");
+  const copyCssButton = document.getElementById("copyCssButton");
+
+  copyHtmlButton.addEventListener("click", async () => {
+    const htmlOutput = document.getElementById("htmlOutput");
+    await copyToClipboard(htmlOutput.textContent, copyHtmlButton);
+  });
+
+  copyCssButton.addEventListener("click", async () => {
+    const cssOutput = document.getElementById("cssOutput");
+    await copyToClipboard(cssOutput.textContent, copyCssButton);
+  });
+
+  async function copyToClipboard(text, button) {
+    try {
+      await navigator.clipboard.writeText(text);
+
+      // copy notification
+      const notification = document.createElement("div");
+      notification.textContent = "Copied!";
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #1a73e8;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 4px;
+        z-index: 9999;
+        animation: fadeOut 1s ease-in-out;
+      `;
+
+      const style = document.createElement("style");
+      style.textContent = `
+        @keyframes fadeOut {
+          0% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      document.body.appendChild(notification);
+      setTimeout(() => {
+        notification.remove();
+        style.remove();
+      }, 1000);
+    } catch (err) {
+      console.error("Failed to copy text:", err);
+    }
+  }
+
   // Update display system
   chrome.runtime.onMessage.addListener(message => {
     if (message.type === "ELEMENT_SELECTED") {
