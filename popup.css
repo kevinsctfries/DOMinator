@@ -213,6 +213,31 @@ button#editMode.active {
   box-sizing: border-box;
 }
 
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.code-header h3 {
+  margin: 0;
+}
+
+.copy-button {
+  width: auto;
+  padding: 6px 12px;
+  font-size: 12px;
+  margin: 0;
+  background-color: #fafbfc;
+  color: black;
+  box-shadow: none;
+}
+
+.copy-button:hover {
+  background-color: #dedfe0;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
