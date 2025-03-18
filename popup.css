@@ -131,3 +131,34 @@ button#editMode.active {
   max-height: 200px;
   overflow-y: auto;
 }
+
+.preview-container {
+  margin: 15px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+.preview-container h3 {
+  margin: 0 0 10px 0;
+  color: #007bff;
+  font-size: 14px;
+  text-align: left;
+}
+
+.element-preview {
+  background: white;
+  padding: 0;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  min-height: 50px;
+  overflow: auto;
+  resize: vertical;
+  max-height: 400px;
+}
+
+/* Remove pointer-events restriction to allow interactions in preview */
+.element-preview > * {
+  max-width: 100%;
+}

@@ -53,15 +53,119 @@ document.addEventListener("DOMContentLoaded", () => {
     if (message.type === "ELEMENT_SELECTED") {
       const htmlOutput = document.getElementById("htmlOutput");
       const cssOutput = document.getElementById("cssOutput");
+      const previewContainer = document.getElementById("elementPreview");
 
-      // Format and display HTML
+      // Format and display HTML/CSS in code blocks
       htmlOutput.textContent = message.rawHtml
         .replace(/></g, ">\n<")
         .replace(/\s{2,}/g, " ")
         .trim();
-
-      // Display CSS
       cssOutput.textContent = message.rawCss;
+
+      // Clear and recreate preview container
+      previewContainer.replaceWith(previewContainer.cloneNode(false));
+      const freshPreviewContainer = document.getElementById("elementPreview");
+
+      // Create shadow DOM
+      const shadow = freshPreviewContainer.attachShadow({ mode: "open" });
+
+      // Create and inject styles
+      const style = document.createElement("style");
+      const bgColor = message.pageBackground;
+
+      style.textContent = `
+        :host {
+          all: initial;
+          display: block;
+          background-color: ${bgColor} !important;
+          padding: 20px;
+          box-sizing: border-box;
+        }
+
+        .preview-wrapper {
+          all: initial;
+          display: block;
+        }
+
+        /* Force text property inheritance */
+        .selected-element {
+          color: inherit;
+          font-family: inherit;
+          font-size: inherit;
+          font-weight: inherit;
+          line-height: inherit;
+          text-align: inherit;
+        }
+
+        /* Reset for proper style application */
+        .selected-element, .selected-element * {
+          all: revert;
+          box-sizing: border-box;
+        }
+
+        /* Apply captured styles with text priority */
+        ${message.rawCss}
+
+        /* Ensure text styles are preserved in children */
+        .selected-element * {
+          color: inherit;
+          font-family: inherit;
+        }
+
+        /* Image handling */
+        .selected-element img {
+          max-width: 100%;
+          height: auto;
+        }
+
+        /* Ensure proper positioning */
+        .selected-element {
+          position: relative !important;
+          left: auto !important;
+          top: auto !important;
+        }
+      `;
+
+      // Create wrapper and process content
+      const wrapper = document.createElement("div");
+      wrapper.className = "preview-wrapper";
+
+      // Parse HTML
+      const template = document.createElement("template");
+      template.innerHTML = message.rawHtml.trim();
+      const element = template.content.firstChild;
+      element.classList.add("selected-element");
+
+      // Fix image paths recursively
+      function processElement(node) {
+        if (node instanceof HTMLImageElement) {
+          try {
+            const src = node.getAttribute("src");
+            if (src && !src.startsWith("data:")) {
+              node.src = new URL(src, message.baseUrl).href;
+            }
+            // Preserve original attributes
+            ["width", "height", "alt", "title"].forEach(attr => {
+              if (node.hasAttribute(attr)) {
+                node.setAttribute(
+                  `data-original-${attr}`,
+                  node.getAttribute(attr)
+                );
+              }
+            });
+          } catch (e) {}
+        }
+        node.childNodes.forEach(child => {
+          if (child.nodeType === 1) processElement(child);
+        });
+      }
+
+      processElement(element);
+      wrapper.appendChild(element);
+
+      // Build preview
+      shadow.appendChild(style);
+      shadow.appendChild(wrapper);
     }
   });
 

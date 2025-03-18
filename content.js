@@ -44,22 +44,58 @@ if (!window.dominatorInitialized) {
 
   // CSS extraction and processing
   function getElementCSS(element) {
-    const styles = {};
-    const computedStyles = window.getComputedStyle(element);
+    function getFullStyles(el) {
+      const computed = window.getComputedStyle(el);
+      let styles = "";
 
-    // Get all applied styles
-    for (let i = 0; i < computedStyles.length; i++) {
-      const prop = computedStyles[i];
-      const value = computedStyles.getPropertyValue(prop);
-      if (value && value !== "initial" && value !== "none" && value !== "0px") {
-        styles[prop] = value;
+      // Essential text properties that must be captured
+      const textProps = [
+        "color",
+        "font-family",
+        "font-size",
+        "font-weight",
+        "font-style",
+        "text-decoration",
+        "text-align",
+        "line-height",
+        "letter-spacing",
+        "word-spacing",
+      ];
+
+      // Ensure text properties are captured first
+      textProps.forEach(prop => {
+        const value = computed.getPropertyValue(prop);
+        if (value && value !== "initial") {
+          styles += `    ${prop}: ${value} !important;\n`;
+        }
+      });
+
+      // Get remaining computed styles
+      for (const prop of computed) {
+        if (!textProps.includes(prop)) {
+          const value = computed.getPropertyValue(prop);
+          if (value && value !== "initial") {
+            styles += `    ${prop}: ${value};\n`;
+          }
+        }
       }
+      return styles;
     }
 
-    // Format CSS into string
-    return Object.entries(styles)
-      .map(([prop, value]) => `${prop}: ${value};`)
-      .join("\n");
+    // Process element and its children with text priority
+    function processElement(el, selector) {
+      let css = `${selector} {\n${getFullStyles(el)}}\n\n`;
+
+      // Process children with more specific selectors
+      Array.from(el.children).forEach((child, index) => {
+        const childSelector = `${selector} > :nth-child(${index + 1})`;
+        css += processElement(child, childSelector);
+      });
+
+      return css;
+    }
+
+    return processElement(element, ".selected-element");
   }
 
   function handleClick(e) {
@@ -138,16 +174,48 @@ if (!window.dominatorInitialized) {
         }
       });
 
-      // Send both raw and processed data
+      // Get the actual background color from highest parent with a background
+      let bgColor = "white";
+      let parentEl = element;
+      const rootBg = window.getComputedStyle(
+        document.documentElement
+      ).backgroundColor;
+      const bodyBg = window.getComputedStyle(document.body).backgroundColor;
+
+      // Check root and body background first
+      if (rootBg && rootBg !== "rgba(0, 0, 0, 0)" && rootBg !== "transparent") {
+        bgColor = rootBg;
+      } else if (
+        bodyBg &&
+        bodyBg !== "rgba(0, 0, 0, 0)" &&
+        bodyBg !== "transparent"
+      ) {
+        bgColor = bodyBg;
+      } else {
+        // Walk up the DOM tree to find background color
+        while (parentEl) {
+          const bg = window.getComputedStyle(parentEl).backgroundColor;
+          if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") {
+            bgColor = bg;
+            break;
+          }
+          parentEl = parentEl.parentElement;
+        }
+      }
+
+      // Send message with corrected data
       chrome.runtime.sendMessage({
         type: "ELEMENT_SELECTED",
         css: cssProperties,
         rawHtml: rawHtml,
         rawCss: rawCss,
+        pageBackground: bgColor,
+        baseUrl: window.location.href,
         elementInfo: {
           tagName: element.tagName.toLowerCase(),
           classes: Array.from(element.classList),
           id: element.id,
+          hasChildren: element.children.length > 0,
         },
       });
     } catch (error) {
