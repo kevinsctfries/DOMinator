@@ -44,6 +44,16 @@ if (!window.dominatorInitialized) {
 
   // CSS extraction and processing
   function getElementCSS(element) {
+    function generateSelector(el) {
+      let selector = el.tagName.toLowerCase();
+      if (el.id) {
+        selector += `#${el.id}`;
+      } else if (el.className) {
+        selector += `.${Array.from(el.classList).join(".")}`;
+      }
+      return selector;
+    }
+
     function getFullStyles(el) {
       const computed = window.getComputedStyle(el);
       let styles = "";
@@ -82,20 +92,21 @@ if (!window.dominatorInitialized) {
       return styles;
     }
 
-    // Process element and its children with text priority
-    function processElement(el, selector) {
-      let css = `${selector} {\n${getFullStyles(el)}}\n\n`;
+    function processElement(el, isRoot = true) {
+      // Generate specific selector for this element
+      const elementSelector = isRoot ? generateSelector(el) : "";
+      let css = `${elementSelector} {\n${getFullStyles(el)}}\n\n`;
 
-      // Process children with more specific selectors
-      Array.from(el.children).forEach((child, index) => {
-        const childSelector = `${selector} > :nth-child(${index + 1})`;
-        css += processElement(child, childSelector);
+      // Process children with their own selectors
+      Array.from(el.children).forEach(child => {
+        const childSelector = generateSelector(child);
+        css += processElement(child, false);
       });
 
       return css;
     }
 
-    return processElement(element, ".selected-element");
+    return processElement(element);
   }
 
   function handleClick(e) {
