@@ -18,7 +18,8 @@
         "popup.css",
         "popup.html",
         "tools/css-editor/cssEditor.html",
-        "tools/css-editor/cssEditor.js"
+        "tools/css-editor/cssEditor.js",
+        "vendor/prism/*"
       ],
       "matches": ["<all_urls>"]
     }

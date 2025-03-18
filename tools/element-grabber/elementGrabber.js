@@ -55,12 +55,18 @@ document.addEventListener("DOMContentLoaded", () => {
       const cssOutput = document.getElementById("cssOutput");
       const previewContainer = document.getElementById("elementPreview");
 
-      // Format and display HTML/CSS in code blocks
-      htmlOutput.textContent = message.rawHtml
+      // Format and display HTML/CSS with syntax highlighting
+      const formattedHtml = message.rawHtml
         .replace(/></g, ">\n<")
         .replace(/\s{2,}/g, " ")
         .trim();
+
+      htmlOutput.textContent = formattedHtml;
       cssOutput.textContent = message.rawCss;
+
+      // Trigger Prism to highlight the code
+      Prism.highlightElement(htmlOutput);
+      Prism.highlightElement(cssOutput);
 
       // Clear and recreate preview container
       previewContainer.replaceWith(previewContainer.cloneNode(false));

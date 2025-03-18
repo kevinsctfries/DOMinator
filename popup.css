@@ -142,18 +142,42 @@ button#editMode.active {
   font-weight: 600;
 }
 
+.code-section pre {
+  margin: 0;
+  border-radius: 6px;
+  background: #2d2d2d !important;
+  overflow-x: auto;
+}
+
+.code-section .line-numbers {
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.code-section code {
+  font-family: "JetBrains Mono", monospace !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+  white-space: pre !important; /* Changed from pre-wrap to pre */
+  display: inline-block;
+  min-width: 100%;
+}
+
 .code-display {
   margin: 0;
-  white-space: pre-wrap;
-  word-wrap: break-word;
+  white-space: pre; /* Changed from pre-wrap */
+  word-wrap: normal; /* Changed from break-word */
   font-family: "JetBrains Mono", monospace;
   font-size: 12px;
   line-height: 1.5;
   background: #f8f9fa;
-  padding: 12px;
+  padding: 12px !important;
   border: 1px solid #e1e4e8;
   border-radius: 6px;
   max-height: 200px;
+  overflow-x: auto;
   overflow-y: auto;
 }
 
