@@ -174,12 +174,4 @@ document.addEventListener("DOMContentLoaded", () => {
       shadow.appendChild(wrapper);
     }
   });
-
-  //   document.getElementById("reset").addEventListener("click", async () => {
-  //     const [tab] = await chrome.tabs.query({
-  //       active: true,
-  //       currentWindow: true,
-  //     });
-  //     chrome.tabs.reload(tab.id);
-  //   });
 });
