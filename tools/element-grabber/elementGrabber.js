@@ -15,21 +15,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const collapseButton = header.querySelector(".collapse-button");
 
       if (!content.classList.contains("collapsed")) {
-        content.style.height = content.scrollHeight + "px";
-        // Force a reflow
-        content.offsetHeight;
         content.classList.add("collapsed");
-        content.style.height = "0";
         collapseButton.classList.add("collapsed");
       } else {
         content.classList.remove("collapsed");
-        content.style.height = content.scrollHeight + "px";
         collapseButton.classList.remove("collapsed");
-        // Remove the explicit height after transition
-        content.addEventListener("transitionend", function handler() {
-          content.style.height = "";
-          content.removeEventListener("transitionend", handler);
-        });
       }
     });
   });
