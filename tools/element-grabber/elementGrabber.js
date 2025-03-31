@@ -154,7 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       style.textContent = `
         :host {
-          all: initial;
           display: block;
           background-color: ${bgColor} !important;
           padding: 20px;
@@ -162,46 +161,41 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         .preview-wrapper {
-          all: initial;
           display: block;
         }
 
-        /* Force text property inheritance */
-        .selected-element {
-          color: inherit;
-          font-family: inherit;
-          font-size: inherit;
-          font-weight: inherit;
-          line-height: inherit;
-          text-align: inherit;
+        /* Base theme support */
+        :root {
+          color-scheme: dark;
         }
 
-        /* Reset for proper style application */
-        .selected-element, .selected-element * {
-          all: revert;
-          box-sizing: border-box;
-        }
-
-        /* Apply captured styles with text priority */
+        /* Apply the raw CSS directly without interference */
         ${message.rawCss}
 
-        /* Ensure text styles are preserved in children */
+        /* Remove any inheritance blocking styles */
+        .selected-element {
+          display: revert;
+        }
+
+        /* Ensure proper inheritance for nested elements */
         .selected-element * {
           color: inherit;
           font-family: inherit;
+          font-size: inherit;
+          line-height: inherit;
         }
 
-        /* Image handling */
-        .selected-element img {
-          max-width: 100%;
-          height: auto;
+        /* Keep specific styling for interactive elements */
+        .selected-element a {
+          color: rgb(140, 180, 255);
+          text-decoration: underline;
         }
 
-        /* Ensure proper positioning */
-        .selected-element {
-          position: relative !important;
-          left: auto !important;
-          top: auto !important;
+        .selected-element code {
+          font-family: Menlo, Consolas, Monaco, monospace;
+          background-color: rgb(52, 52, 52);
+          padding: 2px 4px;
+          border-radius: 4px;
         }
       `;
 

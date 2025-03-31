@@ -44,58 +44,216 @@ if (!window.dominatorInitialized) {
 
   // CSS extraction and processing
   function getElementCSS(element) {
-    function getFullStyles(el) {
-      const computed = window.getComputedStyle(el);
-      let styles = "";
-
-      // Essential text properties that must be captured
-      const textProps = [
+    // Define essential properties first
+    const essentialProps = {
+      layout: [
+        "display",
+        "position",
+        "width",
+        "height",
+        "margin",
+        "margin-top",
+        "margin-right",
+        "margin-bottom",
+        "margin-left",
+        "padding",
+        "padding-top",
+        "padding-right",
+        "padding-bottom",
+        "padding-left",
+        "top",
+        "right",
+        "bottom",
+        "left",
+        "z-index",
+        "flex",
+        "flex-direction",
+        "justify-content",
+        "align-items",
+      ],
+      text: [
         "color",
         "font-family",
         "font-size",
         "font-weight",
-        "font-style",
-        "text-decoration",
         "text-align",
         "line-height",
-        "letter-spacing",
-        "word-spacing",
-      ];
+        "white-space",
+      ],
+      visual: [
+        "background",
+        "background-color",
+        "background-image",
+        "border",
+        "border-radius",
+        "opacity",
+      ],
+    };
 
-      // Ensure text properties are captured first
-      textProps.forEach(prop => {
-        const value = computed.getPropertyValue(prop);
-        if (value && value !== "initial") {
-          styles += `    ${prop}: ${value} !important;\n`;
+    function getFullStyles(el) {
+      const computed = window.getComputedStyle(el);
+      let styles = "";
+
+      // Always include these critical properties
+      const criticalProps = new Set([
+        "color",
+        "background-color",
+        "font-family",
+        "font-size",
+        "font-weight",
+        "line-height",
+        "text-align",
+        "display",
+        "position",
+        "width",
+        "height",
+        "margin",
+        "padding",
+        "border",
+        "opacity",
+      ]);
+
+      function shouldIncludeProperty(prop, value) {
+        if (!value) return false;
+
+        // Always include critical properties
+        if (criticalProps.has(prop)) {
+          return value !== "initial" && value !== "inherit";
         }
-      });
 
-      // Get remaining computed styles
-      for (const prop of computed) {
-        if (!textProps.includes(prop)) {
-          const value = computed.getPropertyValue(prop);
-          if (value && value !== "initial") {
+        return (
+          value !== "none" &&
+          value !== "0px" &&
+          value !== "normal" &&
+          value !== "auto" &&
+          value !== "rgba(0, 0, 0, 0)" &&
+          value !== "transparent" &&
+          value !== "initial" &&
+          value !== ""
+        );
+      }
+
+      Object.entries(essentialProps).forEach(([category, props]) => {
+        props.forEach(prop => {
+          // Get both computed and actual style value
+          const computedValue = computed.getPropertyValue(prop);
+          const inlineValue = el.style.getPropertyValue(prop);
+
+          // Prefer inline styles over computed styles
+          const value = inlineValue || computedValue;
+
+          // Skip CSS variables and pseudo-elements
+          if (prop.startsWith(":") || prop.includes("--")) {
+            return;
+          }
+
+          // Always include critical properties with their computed values
+          if (criticalProps.has(prop)) {
+            if (computedValue && computedValue !== "initial") {
+              styles += `    ${prop}: ${computedValue};\n`;
+            }
+            return;
+          }
+
+          // Handle other properties
+          if (shouldIncludeProperty(prop, value)) {
             styles += `    ${prop}: ${value};\n`;
           }
-        }
+        });
+      });
+
+      // Add any important inline styles last to ensure they take precedence
+      if (el.style.cssText) {
+        const inlineStyles = el.style.cssText.split(";");
+        inlineStyles.forEach(style => {
+          const [prop, value] = style.split(":").map(s => s.trim());
+          if (prop && value && prop !== "outline") {
+            styles += `    ${prop}: ${value};\n`;
+          }
+        });
       }
+
       return styles;
     }
 
-    // Process element and its children with text priority
-    function processElement(el, selector) {
-      let css = `${selector} {\n${getFullStyles(el)}}\n\n`;
+    function generateSelector(el) {
+      // Use ID if available
+      if (el.id) {
+        return `#${el.id}`;
+      }
 
-      // Process children with more specific selectors
-      Array.from(el.children).forEach((child, index) => {
-        const childSelector = `${selector} > :nth-child(${index + 1})`;
-        css += processElement(child, childSelector);
+      // Use classes if available
+      if (el.classList.length > 0) {
+        const classSelector = Array.from(el.classList)
+          .filter(cls => !cls.includes("selected-element"))
+          .join(".");
+        return `.${classSelector}`;
+      }
+
+      // Fallback to simple tag name
+      return el.tagName.toLowerCase();
+    }
+
+    function getContextStyles() {
+      let contextCSS = "";
+      const rootStyles = window.getComputedStyle(document.documentElement);
+      const bodyStyles = window.getComputedStyle(document.body);
+
+      // Check root styles
+      const rootBg = rootStyles.backgroundColor;
+      const bodyBg = bodyStyles.backgroundColor;
+
+      if (rootBg && rootBg !== "rgba(0, 0, 0, 0)" && rootBg !== "transparent") {
+        contextCSS += `:root {\n    background-color: ${rootBg};\n}\n\n`;
+      }
+
+      if (bodyBg && bodyBg !== "rgba(0, 0, 0, 0)" && bodyBg !== "transparent") {
+        contextCSS += `body {\n    background-color: ${bodyBg};\n}\n\n`;
+      }
+
+      return contextCSS;
+    }
+
+    function processElement(el, parentSelector = "") {
+      if (el.shadowRoot || el.tagName.toLowerCase().includes("-")) {
+        return "";
+      }
+
+      let css = "";
+      const processedSelectors = new Set(); // Track processed selectors
+
+      // Add context styles only for the root element
+      if (el === element) {
+        css += getContextStyles();
+      }
+
+      // Generate selector and get styles
+      const selector = generateSelector(el);
+      const styles = getFullStyles(el);
+
+      // Only add styles if they exist and haven't been processed
+      if (styles.trim() && !processedSelectors.has(selector)) {
+        css += `${selector} {\n${styles}}\n\n`;
+        processedSelectors.add(selector);
+      }
+
+      // Process children recursively
+      const processedChildren = new Map(); // Track processed child types
+
+      Array.from(el.children).forEach(child => {
+        const childSelector = generateSelector(child);
+
+        // Only process each unique child selector once
+        if (!processedChildren.has(childSelector)) {
+          processedChildren.set(childSelector, true);
+          css += processElement(child);
+        }
       });
 
       return css;
     }
 
-    return processElement(element, ".selected-element");
+    return processElement(element);
   }
 
   function handleClick(e) {
@@ -134,6 +292,20 @@ if (!window.dominatorInitialized) {
         if (prop !== "outline") {
           cssProperties[prop] = inlineStyles[prop];
         }
+      }
+
+      // Preserve original dimensions
+      const originalWidth = element.style.width;
+      const originalHeight = element.style.height;
+
+      // Add to cssProperties
+      if (originalWidth) cssProperties["width"] = originalWidth;
+      if (originalHeight) cssProperties["height"] = originalHeight;
+
+      // Ensure SVG viewBox is preserved
+      if (element instanceof SVGElement) {
+        const viewBox = element.getAttribute("viewBox");
+        if (viewBox) cssProperties["viewBox"] = viewBox;
       }
 
       // Process stylesheet rules
