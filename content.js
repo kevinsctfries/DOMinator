@@ -24,7 +24,7 @@ if (!window.dominatorInitialized) {
     if (!window.dominator.isEditMode) return;
     if (e.target === document.body) return;
     if (e.target === window.dominator.activeElement) return;
-    e.target.style.outline = "2px solid rgba(0, 123, 255, 0.5)"; // Light blue
+    e.target.style.outline = "2px dashed rgba(0, 123, 255, 0.5)"; // Light blue
   }
 
   function handleMouseOut(e) {
@@ -279,7 +279,7 @@ if (!window.dominatorInitialized) {
 
       // Restore active element highlighting
       window.dominator.activeElement = element;
-      element.style.outline = "1px solid rgba(0, 123, 255, 0.7)";
+      element.style.outline = "2px solid rgba(0, 123, 255, 0.7)";
 
       // Get CSS properties for CSS editor (using the same outline-free state)
       const computedStyles = window.getComputedStyle(element);
