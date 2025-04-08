@@ -1,17 +1,29 @@
+:root {
+  --bg-main: #1e2a38;
+  --bg-light: #263544;
+  --text-main: #e5ecf3;
+  --text-muted: #b0bcd0;
+  --accent-blue: #4c8eda;
+  --accent-green: #34c38f;
+  --accent-red: #e76d6d;
+  --border-color: #3a4a5a;
+  --hover-bg: #2a3b4d;
+}
+
 body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
   width: auto;
   min-width: 300px;
   padding: 15px;
   text-align: center;
-  background-color: #fafbfc;
-  color: #2c3e50;
+  background-color: var(--bg-main);
+  color: var(--text-main);
 }
 
 h2 {
   font-size: 20px;
   margin-bottom: 15px;
-  color: #1a73e8;
+  color: var(--accent-blue);
   font-weight: 600;
 }
 
@@ -20,28 +32,28 @@ button {
   padding: 10px;
   margin: 6px 0;
   border: none;
-  background-color: #1a73e8;
+  background-color: var(--accent-blue);
   color: white;
   cursor: pointer;
   border-radius: 8px;
   font-weight: 500;
   transition: transform 0.2s ease, background-color 0.2s ease,
     box-shadow 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 button:hover {
-  background-color: #1557b0;
+  background-color: #3a74c1;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 button#editMode {
-  background-color: #34a853;
+  background-color: var(--accent-green);
 }
 
 button#editMode.active {
-  background-color: #ea4335;
+  background-color: var(--accent-red);
 }
 
 .properties-container {
@@ -49,19 +61,19 @@ button#editMode.active {
   overflow-y: auto;
   margin-top: 15px;
   text-align: left;
-  border: 1px solid #e1e4e8;
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 10px;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: var(--bg-light);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .css-category h3 {
   font-size: 14px;
-  color: #1a73e8;
+  color: var(--accent-blue);
   margin: 12px 0 8px 0;
   padding-bottom: 5px;
-  border-bottom: 2px solid #e1e4e8;
+  border-bottom: 2px solid var(--border-color);
   font-weight: 600;
 }
 
@@ -71,54 +83,56 @@ button#editMode.active {
   font-family: "JetBrains Mono", monospace;
   font-size: 12px;
   padding: 5px 0 5px 12px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-color);
   transition: background-color 0.2s ease;
 }
 
 .css-property:hover {
-  background-color: #f8f9fa;
+  background-color: var(--hover-bg);
 }
 
 .css-value-input {
   flex: 1;
   margin-left: 8px;
-  border: 1px solid #e1e4e8;
+  border: 1px solid var(--border-color);
   padding: 4px 8px;
   font-family: "JetBrains Mono", monospace;
   font-size: 12px;
   border-radius: 4px;
+  background-color: #1f2d3a;
+  color: var(--text-main);
   transition: all 0.2s ease;
 }
 
 .css-value-input:focus {
   outline: none;
-  border-color: #1a73e8;
-  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 2px rgba(76, 142, 218, 0.4);
 }
 
 .element-info {
   margin: 12px 0;
   padding: 12px;
-  background: white;
-  border: 1px solid #e1e4e8;
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-family: "JetBrains Mono", monospace;
   font-size: 12px;
   text-align: left;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .element-info .tag {
-  color: #1a73e8;
+  color: var(--accent-blue);
   font-weight: bold;
 }
 
 .element-info .class {
-  color: #34a853;
+  color: var(--accent-green);
 }
 
 .element-info .id {
-  color: #ea4335;
+  color: var(--accent-red);
 }
 
 .code-container {
@@ -129,15 +143,15 @@ button#editMode.active {
 .code-section {
   margin: 12px 0;
   padding: 15px;
-  background: white;
-  border: 1px solid #e1e4e8;
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .code-section h3 {
   margin: 0 0 12px 0;
-  color: #1a73e8;
+  color: var(--accent-blue);
   font-size: 14px;
   font-weight: 600;
 }
@@ -145,7 +159,7 @@ button#editMode.active {
 .code-section pre {
   margin: 0;
   border-radius: 6px;
-  background: #2d2d2d !important;
+  background: #111d2b !important;
   overflow-x: auto;
 }
 
@@ -160,21 +174,23 @@ button#editMode.active {
   font-family: "JetBrains Mono", monospace !important;
   font-size: 12px !important;
   line-height: 1.5 !important;
-  white-space: pre !important; /* Changed from pre-wrap to pre */
+  white-space: pre !important;
   display: inline-block;
   min-width: 100%;
+  color: var(--text-muted);
 }
 
 .code-display {
   margin: 0;
-  white-space: pre; /* Changed from pre-wrap */
-  word-wrap: normal; /* Changed from break-word */
+  white-space: pre;
+  word-wrap: normal;
   font-family: "JetBrains Mono", monospace;
   font-size: 12px;
   line-height: 1.5;
-  background: #f8f9fa;
+  background: #111d2b;
+  color: var(--text-muted);
   padding: 12px !important;
-  border: 1px solid #e1e4e8;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   max-height: 200px;
   overflow-x: auto;
@@ -184,24 +200,24 @@ button#editMode.active {
 .preview-container {
   margin: 20px 0;
   padding: 15px;
-  background: white;
-  border: 1px solid #e1e4e8;
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .preview-container h3 {
   margin: 0 0 12px 0;
-  color: #1a73e8;
+  color: var(--accent-blue);
   font-size: 14px;
   text-align: left;
   font-weight: 600;
 }
 
 .element-preview {
-  background: white;
+  background: #1f2d3a;
   padding: 0;
-  border: 1px solid #e1e4e8;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   min-height: 50px;
   overflow-x: auto;
@@ -211,6 +227,7 @@ button#editMode.active {
   transition: border-color 0.2s ease;
   width: 100%;
   box-sizing: border-box;
+  color: var(--text-main);
 }
 
 .code-header {
@@ -231,7 +248,7 @@ button#editMode.active {
   background: none;
   border: none;
   padding: 0 4px;
-  color: #1a73e8;
+  color: var(--accent-blue);
   cursor: pointer;
   transition: transform 0.2s ease;
   width: auto;
@@ -258,13 +275,13 @@ button#editMode.active {
   padding: 6px 12px;
   font-size: 12px;
   margin: 0;
-  background-color: #fafbfc;
-  color: black;
+  background-color: #314559;
+  color: var(--text-main);
   box-shadow: none;
 }
 
 .copy-button:hover {
-  background-color: #dedfe0;
+  background-color: #3e5c75;
 }
 
 ::-webkit-scrollbar {
@@ -273,15 +290,15 @@ button#editMode.active {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #2b3b4a;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: #4e6173;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #637c91;
 }
