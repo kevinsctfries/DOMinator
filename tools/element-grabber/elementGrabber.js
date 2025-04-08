@@ -4,10 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "../../popup.html";
   });
 
-  // Add this near the top of your DOMContentLoaded handler
   document.querySelectorAll(".code-header").forEach(header => {
     header.addEventListener("click", e => {
-      // Don't collapse if clicking the copy button
       if (e.target.classList.contains("copy-button")) return;
 
       const section = header.closest(".code-section");
@@ -15,26 +13,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const collapseButton = header.querySelector(".collapse-button");
 
       if (!content.classList.contains("collapsed")) {
-        content.style.height = content.scrollHeight + "px";
-        // Force a reflow
-        content.offsetHeight;
         content.classList.add("collapsed");
-        content.style.height = "0";
         collapseButton.classList.add("collapsed");
       } else {
         content.classList.remove("collapsed");
-        content.style.height = content.scrollHeight + "px";
         collapseButton.classList.remove("collapsed");
-        // Remove the explicit height after transition
-        content.addEventListener("transitionend", function handler() {
-          content.style.height = "";
-          content.removeEventListener("transitionend", handler);
-        });
       }
     });
   });
 
-  const editModeButton = document.getElementById("grabElement");
+  const editModeButton = document.getElementById("editMode");
   let isEditModeActive = false;
 
   let activeTabId = null;
@@ -71,10 +59,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Helper function for button state management
   function updateButtonState(active) {
     editModeButton.textContent = active
-      ? "Enable Element Grabber"
-      : "Disable Element Grabber";
+      ? "Disable Element Grabber"
+      : "Enable Element Grabber";
     editModeButton.className = active ? "active" : "";
   }
 
@@ -164,7 +153,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       style.textContent = `
         :host {
-          all: initial;
           display: block;
           background-color: ${bgColor} !important;
           padding: 20px;
@@ -172,46 +160,41 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         .preview-wrapper {
-          all: initial;
           display: block;
         }
 
-        /* Force text property inheritance */
-        .selected-element {
-          color: inherit;
-          font-family: inherit;
-          font-size: inherit;
-          font-weight: inherit;
-          line-height: inherit;
-          text-align: inherit;
+        /* Base theme support */
+        :root {
+          color-scheme: dark;
         }
 
-        /* Reset for proper style application */
-        .selected-element, .selected-element * {
-          all: revert;
-          box-sizing: border-box;
-        }
-
-        /* Apply captured styles with text priority */
+        /* Apply the raw CSS directly without interference */
         ${message.rawCss}
 
-        /* Ensure text styles are preserved in children */
+        /* Remove any inheritance blocking styles */
+        .selected-element {
+          display: revert;
+        }
+
+        /* Ensure proper inheritance for nested elements */
         .selected-element * {
           color: inherit;
           font-family: inherit;
+          font-size: inherit;
+          line-height: inherit;
         }
 
-        /* Image handling */
-        .selected-element img {
-          max-width: 100%;
-          height: auto;
+        /* Keep specific styling for interactive elements */
+        .selected-element a {
+          color: rgb(140, 180, 255);
+          text-decoration: underline;
         }
 
-        /* Ensure proper positioning */
-        .selected-element {
-          position: relative !important;
-          left: auto !important;
-          top: auto !important;
+        .selected-element code {
+          font-family: Menlo, Consolas, Monaco, monospace;
+          background-color: rgb(52, 52, 52);
+          padding: 2px 4px;
+          border-radius: 4px;
         }
       `;
 
