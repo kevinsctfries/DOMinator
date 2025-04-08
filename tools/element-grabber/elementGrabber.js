@@ -4,10 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "../../popup.html";
   });
 
-  // Add this near the top of your DOMContentLoaded handler
   document.querySelectorAll(".code-header").forEach(header => {
     header.addEventListener("click", e => {
-      // Don't collapse if clicking the copy button
       if (e.target.classList.contains("copy-button")) return;
 
       const section = header.closest(".code-section");
@@ -24,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  const editModeButton = document.getElementById("grabElement");
+  const editModeButton = document.getElementById("editMode");
   let isEditModeActive = false;
 
   let activeTabId = null;
@@ -61,10 +59,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Helper function for button state management
   function updateButtonState(active) {
     editModeButton.textContent = active
-      ? "Enable Element Grabber"
-      : "Disable Element Grabber";
+      ? "Disable Element Grabber"
+      : "Enable Element Grabber";
     editModeButton.className = active ? "active" : "";
   }
 
